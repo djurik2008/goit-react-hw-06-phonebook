@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PhoneBookForm from './PhoneBookForm/PhoneBookForm';
 import PhoneBookList from './PhoneBookList/PhoneBookList';
@@ -13,8 +12,6 @@ import { getFilteredContacts } from '../../redux/myPhoneBook/contacts/contacts-s
 const PhoneBook = () => {
   const contacts = useSelector(getFilteredContacts);
   const dispatch = useDispatch();
-
-  const firstRender = useRef(true);
 
   const isDublicate = ({ name, number }) => {
     const normalizedName = name.toLowerCase();
@@ -45,16 +42,6 @@ const PhoneBook = () => {
 
   const changeFitler = ({ target }) =>
     dispatch(setFilter(target.value.toLowerCase()));
-
-  useEffect(() => {
-    if (!firstRender.current) {
-      localStorage.setItem('my-contacts', JSON.stringify(contacts));
-    }
-  }, [contacts]);
-
-  useEffect(() => {
-    firstRender.current = false;
-  }, []);
 
   return (
     <div>
