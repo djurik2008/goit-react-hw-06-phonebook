@@ -1,23 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
-import { nanoid } from 'nanoid';
+import { useEffect, useRef } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import PhoneBookForm from './PhoneBookForm/PhoneBookForm';
 import PhoneBookList from './PhoneBookList/PhoneBookList';
 import css from './PhoneBook.module.css';
+import {
+  addContact,
+  removeContact,
+} from '../../redux/myPhoneBook/contacts/contactsSlice';
+import { setFilter } from '../../redux/myPhoneBook/filter/filterslice';
+import { getFilteredContacts } from '../../redux/myPhoneBook/contacts/contacts-selectors';
 
 const PhoneBook = () => {
-  const [contacts, setContacts] = useState(() => {
-    const data = JSON.parse(localStorage.getItem('my-contacts'));
-    return data?.length
-      ? data
-      : [
-          { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-          { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-          { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-          { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-        ];
-  });
-
-  const [filter, setFilter] = useState('');
+  const contacts = useSelector(getFilteredContacts);
+  const dispatch = useDispatch();
 
   const firstRender = useRef(true);
 
@@ -35,28 +30,21 @@ const PhoneBook = () => {
     return Boolean(dublicate);
   };
 
-  const addContact = data => {
+  const add_Contact = data => {
     if (isDublicate(data)) {
       return alert(
         `Contact with name ${data.name} and number ${data.number} already in list`
       );
     }
-
-    setContacts(prevContacts => {
-      const newContact = {
-        id: nanoid(4),
-        ...data,
-      };
-
-      return [...prevContacts, newContact];
-    });
+    dispatch(addContact(data));
   };
 
-  const deleteContact = id => {
-    setContacts(prevContacts => prevContacts.filter(item => item.id !== id));
+  const onDeleteContact = id => {
+    dispatch(removeContact(id));
   };
 
-  const changeFitler = ({ target }) => setFilter(target.value);
+  const changeFitler = ({ target }) =>
+    dispatch(setFilter(target.value.toLowerCase()));
 
   useEffect(() => {
     if (!firstRender.current) {
@@ -68,30 +56,9 @@ const PhoneBook = () => {
     firstRender.current = false;
   }, []);
 
-  const getFilteredContacts = () => {
-    if (!filter) {
-      return contacts;
-    }
-
-    const normalizedFilter = filter.toLowerCase();
-
-    const filteredContacts = contacts.filter(({ name, number }) => {
-      const normalizedName = name.toLowerCase();
-
-      return (
-        normalizedName.includes(normalizedFilter) ||
-        number.includes(normalizedFilter)
-      );
-    });
-
-    return filteredContacts;
-  };
-
-  const inems = getFilteredContacts();
-
   return (
     <div>
-      <PhoneBookForm onSubmit={addContact} />
+      <PhoneBookForm onSubmit={add_Contact} />
       <div>
         <input
           onChange={changeFitler}
@@ -99,7 +66,7 @@ const PhoneBook = () => {
           placeholder="Find contact"
           className={css.filterInput}
         />
-        <PhoneBookList items={inems} deleteContact={deleteContact} />
+        <PhoneBookList items={contacts} deleteContact={onDeleteContact} />
       </div>
     </div>
   );

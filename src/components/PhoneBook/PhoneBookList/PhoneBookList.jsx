@@ -3,7 +3,7 @@ import css from './PhoneBookList.module.css';
 const PhoneBookList = ({ items, deleteContact }) => {
   const elements = items.map(({ id, name, number }) => (
     <li key={id} className={css.item}>
-      {name}: {number}{' '}
+      {name}: {number}
       <button
         type="button"
         onClick={() => deleteContact(id)}
