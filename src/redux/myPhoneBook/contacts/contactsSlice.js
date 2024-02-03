@@ -24,7 +24,6 @@ export const contactsSlice = createSlice({
       },
     },
     removeContact(state, { payload }) {
-      console.log(state);
       return state.filter(item => item.id !== payload);
     },
   },

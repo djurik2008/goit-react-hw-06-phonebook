@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from '../../../redux/myPhoneBook/contacts/contactsSlice';
+import { getFilteredContacts } from '../../../redux/myPhoneBook/contacts/contacts-selectors';
+
 import css from './PhoneBookForm.module.css';
 
 const INITIAL_STATE = {
@@ -12,8 +16,26 @@ const TEXT_PATTERN =
 const PHONE_PATTERN =
   '\\+?\\d{1,4}?[ .\\-\\s]?\\(?\\d{1,3}?\\)?[ .\\-\\s]?\\d{1,4}[ .\\-\\s]?\\d{1,4}[ .\\-\\s]?\\d{1,9}';
 
-const PhoneBookForm = ({ onSubmit }) => {
+const PhoneBookForm = () => {
   const [state, setState] = useState({ ...INITIAL_STATE });
+
+  const contacts = useSelector(getFilteredContacts);
+  const dispatch = useDispatch();
+  const contactData = { ...state };
+
+  const isDublicate = ({ name, number }) => {
+    const normalizedName = name.toLowerCase();
+
+    const dublicate = contacts.find(item => {
+      const normalizedCurrentName = item.name.toLowerCase();
+      const currentNumber = item.number;
+      return (
+        normalizedCurrentName === normalizedName || currentNumber === number
+      );
+    });
+
+    return Boolean(dublicate);
+  };
 
   const handleChange = ({ target }) => {
     const { name, value } = target;
@@ -25,7 +47,12 @@ const PhoneBookForm = ({ onSubmit }) => {
 
   const handleSubmit = e => {
     e.preventDefault();
-    onSubmit({ ...state });
+    if (isDublicate(contactData)) {
+      return alert(
+        `Contact with name ${contactData.name} and number ${contactData.number} already in list`
+      );
+    }
+    dispatch(addContact(contactData));
     reset();
   };
 
